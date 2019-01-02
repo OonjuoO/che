@@ -12,7 +12,7 @@
                          che-form="editMachineForm"
                          che-name="name"
                          che-place-holder="enter machine's name"
-                         che-on-change="editMachineDialogController.onNameChange($value)"
+                         che-on-change="editMachineDialogController.onNameChange($value, editMachineForm.$valid)"
                          custom-validator="editMachineDialogController.isUnique($value)"
                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 } }"
                          ng-model="editMachineDialogController.machineName"

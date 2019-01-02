@@ -150,8 +150,12 @@ export class EditMachineDialogController {
   /**
    * Update machine's name if it change.
    * @param {string} name
+   * @param {boolean} isValid
    */
-  onNameChange(name: string): void {
+  onNameChange(name: string, isValid: boolean): void {
+    if (!isValid) {
+      return;
+    }
     const oldMachineName = this.isAdd ? this.machine.name : this.machineName;
     this.machineName = name;
     const machineName = this.getFullName(name);
@@ -167,6 +171,7 @@ export class EditMachineDialogController {
     this.machine.recipe = machines[machineIndex].recipe;
     this.currentStateEnvironment = this.environmentManager.getEnvironment(environment, machines);
     this.stringifyMachineRecipe();
+    this.machine.name = this.getFullName(name);
   }
 
   /**
@@ -176,7 +181,8 @@ export class EditMachineDialogController {
   isRecipeValid(): che.IValidation {
     try {
       this.machine.recipe = this.environmentManager.parseMachineRecipe(this.machineRecipeScript);
-      if (this.cheRecipeService.isOpenshift(this.currentStateEnvironment.recipe)) {
+      const recipe = this.currentStateEnvironment.recipe;
+      if (this.cheRecipeService.isOpenshift(recipe) || this.cheRecipeService.isKubernetes(recipe)) {
         const newPod = this.machine.recipe.metadata.name;
         const oldPod = this.originMachine.recipe.metadata.name;
         if (newPod !== oldPod && this.usedMachinesNames.map((name: string) => {
@@ -234,7 +240,7 @@ export class EditMachineDialogController {
       // checks machine name changes
       const newMachineName = this.environmentManager.getMachineName(this.machine);
       if (this.machineName !== newMachineName) {
-        this.onNameChange(newMachineName);
+        this.machineName = newMachineName;
       }
       // checks memory limit changes
       this.checkMemoryLimitChanges();
@@ -309,7 +315,7 @@ export class EditMachineDialogController {
           this.currentStateEnvironment = this.environmentManager.addMachine(this.currentStateEnvironment, this.machine);
           const name = this.environmentManager.getMachineName(this.machine);
           if (!this.currentStateEnvironment.machines[this.getFullName(name)]) {
-            this.onNameChange(name);
+            this.machineName = name;
           }
         }
       }
